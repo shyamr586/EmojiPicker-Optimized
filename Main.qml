@@ -27,7 +27,7 @@ Window {
                             id: highlight
                             anchors.bottom: parent.bottom
                             height: 4; width: parent.width
-                            visible: index === listViewElem.currIndex && listViewElem.headerItem.userInput === ""
+                            visible: index === listViewElem.listIndex && listViewElem.headerItem.userInput === ""
                             color :"#01a884"
                         }
                     }
@@ -38,9 +38,9 @@ Window {
         ListView {
             id: listViewElem
             anchors { top: row.bottom; bottom: parent.bottom; left: parent.left; right: parent.right; bottomMargin: 20 }
-            property int currIndex
+            property int listIndex
             model: myModel.jsModel
-            preferredHighlightBegin: 50
+            preferredHighlightBegin: 0
             highlightRangeMode: ListView.ApplyRange
             highlightMoveDuration: 200
             boundsBehavior: Flickable.StopAtBounds
@@ -65,26 +65,27 @@ Window {
             }
             headerPositioning: listViewElem.headerItem.userInput===""?ListView.PullBackHeader:ListView.OverlayHeader
             delegate: Column {
-                id: category
-                spacing: emojiValuesRepeater.count === 0 ? 0 : 20
-                leftPadding: 20; rightPadding: 20; topPadding: emojiValuesRepeater.count === 0 ? 0 : 10
-                visible: emojiValuesRepeater.count !== 0
-                Text { id: categoryText; text: modelData.category; visible: emojiValuesRepeater.count === 0 ? false : true; color: "#798287"; font.pixelSize: 14; font.weight: Font.DemiBold }
+                spacing: 10
+                leftPadding: 20; rightPadding: 20; topPadding: emojisFlow.visible*10
+                Text {
+                    text: modelData.category
+                    font { pixelSize: 14; weight: Font.DemiBold } color: "#798287"
+                    visible: emojisFlow.visible
+                }
                 Flow {
                     id: emojisFlow
                     width: listViewElem.width - (parent.leftPadding + parent.rightPadding)
-                    visible: emojiValuesRepeater.count === 0 ? false : true
-                    spacing: emojiValuesRepeater.count === 0 ? 0 : 20
+                    visible: height
+                    spacing: 20
                     Repeater {
-                        id: emojiValuesRepeater
                         model: listViewElem.headerItem.userInput!=="" ? modelData.emojis.filter(elem => elem.description.includes(listViewElem.headerItem.userInput)) : modelData.emojis
                         delegate: Text {text: modelData.emoji; font.pixelSize: 30}
                     }
                 }
             }
             onContentYChanged: {
-                var listIndex = listViewElem.indexAt(contentX,contentY+listViewElem.headerItem.height);
-                if (listIndex!==-1){currIndex = listIndex}
+                var viewIndex = listViewElem.indexAt(contentX,contentY+listViewElem.headerItem.height);
+                if (viewIndex!==-1){listIndex = viewIndex}
             }
         }
     }
